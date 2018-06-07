@@ -4,7 +4,7 @@
 This program executes a program called InterVar, implementing the ACMG/AMP 2015 guideline,
 to process a list of genes to identify (likely) pathogenic rare variants
 
-command: ./bin/paver.py --inputF input/rpe65.txt --ref gnomad/gnomad.genomes.r2.0.2.sites.chr1.vcf.gz --out_dir chr1_rpe65
+command: ./bin/paver.py --inputF input/genelist.txt --ref gnomad/gnomad.genomes.r2.0.2.sites.chr1.vcf.gz --out_dir output_gene
          --inputF : input file that lists gene(s) symbols. Note that one gene per line is required.
          --ref    : vcf file that includes the variants call. Requird filed is CHROM\tPOS\tID\tREF\tALT
                     your gene symbol must present in the vcf file.
@@ -69,6 +69,21 @@ def job_proc(cmd, tmp_dir, intervar_path):
     stderr.close()
     stdout.close()
 
+def hwe_proc(cmd, tmp_dir):
+    stdout = tempfile.NamedTemporaryFile( prefix="hwe-stdout-", dir=tmp_dir )
+    stderr = tempfile.NamedTemporaryFile( prefix="hwe-stderr-", dir=tmp_dir )
+    proc = subprocess.Popen( args=cmd, stdout=stdout, stderr=stderr, shell=True, cwd=tmp_dir)
+    return_code = proc.wait()
+
+    if return_code:
+        stderr_target = sys.stderr
+    else:
+        stderr_target = sys.stdout
+        stderr.flush()
+        stderr.seek(0)
+    stderr.close()
+    stdout.close()
+
 def post_proc(intervarF, outname, out_dir):
     #intervarF="/var/folders/gq/y3z1z7dd6vjdf2kpryyp6h_h0000gn/T/intervar-jg4_f9n7/cep290.hg19_multianno.txt.intervar"
     intervar_reader = open(intervarF, 'r')
@@ -108,6 +123,7 @@ def __main__():
     (options, args) = parser.parse_args()
 
     intervar_bin="/Users/sjung/Documents/GitHub/pavar/InterVar/Intervar.py"
+    hwe_bin="/Users/sjung/Documents/GitHub/pavar/bin/hwe.R"
     intervar_path="/Users/sjung/Documents/GitHub/pavar/InterVar/"
     tmp_dir = tempfile.mkdtemp(prefix="intervar-")
     #print(tmp_dir)
@@ -127,8 +143,6 @@ def __main__():
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
 
-
-
     extract_gene(inputF, input_vcf, options.ref)
     VCFs = sorted(glob.glob("%s/*.vcf" % input_vcf))
     vcf2bed(VCFs, input_bed)
@@ -137,7 +151,7 @@ def __main__():
     BEDs = sorted(glob.glob("%s/*.bed" % input_bed))
 
     for i in BEDs:
-        intervarOutput = "%s.tmp" % (i); print(intervarOutput)
+        intervarOutput = "%s.tmp" % (i); #print(intervarOutput)
         genename=os.path.splitext(os.path.basename(i))[0]
 
         cmd = "%s -b hg19 -i %s -o %s" % (intervar_bin, i, intervarOutput)
@@ -149,6 +163,21 @@ def __main__():
         shutil.move("%s/input_vcf" %tmp_dir,out_dir)
     except OSError as e:
         print('Directory not copied. Error: %s' % e)
-    shutil.rmtree(tmp_dir)
+
+    for j in VCFs:
+        genesymbol=os.path.splitext(os.path.basename(j))[0]
+        paverfile= "%s/%s.pathogenic.intervar.txt" % (out_dir,genesymbol)
+        vcffile= "%s/input_vcf/%s.vcf" % (out_dir,genesymbol)
+        hwe= "%s/%s_hwe.txt" % (out_dir,genesymbol)
+        cmd = "Rscript %s -v %s -i %s -o %s" % (hwe_bin, vcffile, paverfile, hwe)
+        #print(cmd); print(out_dir)
+        hwe_proc(cmd, out_dir)
+
+    #shutil.rmtree(tmp_dir)
+
+
+
+
+
 
 if __name__=="__main__": __main__()
