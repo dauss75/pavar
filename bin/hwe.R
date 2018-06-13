@@ -1,5 +1,10 @@
-library(HardyWeinberg)
-library(optparse)
+ packages <- c("data.table", "HardyWeinberg", "optparse")
+ if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+   install.packages(setdiff(packages, rownames(installed.packages())),repos = "http://cran.us.r-project.org")
+ }
+suppressPackageStartupMessages(library(HardyWeinberg))
+suppressPackageStartupMessages(library(optparse))
+suppressPackageStartupMessages(library(data.table))
 
 option_list = list(
   make_option(c("-v", "--vcf"),  type="character", help="gnomad vcf for genes"),
@@ -18,9 +23,9 @@ if ( is.null(opt$v) & is.null(opt$i)) {
 }
 
 combo<-merge(gnomad,paver,by="V2")
-HWE.test<-as.data.frame(matrix(, nrow = nrow(combo), ncol = 13))
+HWE.test<-as.data.frame(matrix(, nrow = nrow(combo), ncol = 15))
 us.pop=326766748
-colnames(HWE.test)<-c("Chr","Pos","GC_MM","GC_MN","GC_NN","p-val","HWE","AF","AF_male","AF_female","LCA_AF","LCA_AF_male","LCA_AF_female")
+colnames(HWE.test)<-c("Chr","Pos","GC_MM","GC_MN","GC_NN","p-val","HWE","AF","AF_male","AF_female","LCA_AF","LCA_AF_male","LCA_AF_female","q=Sum(AF)","Carrier")
 alpha=0.05
 for (i in 1:nrow(combo)){
   string=combo$V8.x[i]
@@ -45,4 +50,9 @@ for (i in 1:nrow(combo)){
   HWE.test[i,11:13]<-c(lca.AF,lca.AF_male,lca.AF_female)
 }
 
-write.table(HWE.test, opt$o, sep="\t", quote=FALSE, row.names=FALSE)
+sig_q <- sum(HWE.test[,8])
+carrier <- floor(sig_q*sig_q*us.pop)
+HWE.test[1,14:15]<-c(sig_q,carrier)
+
+#write.table(HWE.test, opt$o, sep="\t", quote=FALSE, row.names=FALSE)
+fwrite(HWE.test, opt$o, sep="\t")

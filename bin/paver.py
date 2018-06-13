@@ -173,7 +173,7 @@ def __main__():
         #print(cmd); print(out_dir)
         hwe_proc(cmd, out_dir)
 
-    #shutil.rmtree(tmp_dir)
+    shutil.rmtree(tmp_dir)
 
 
 
