@@ -161,10 +161,10 @@ def __main__():
         post_proc(intervarF,genename, out_dir)
     try:
         shutil.move("%s/input_vcf" %tmp_dir,out_dir)
+        shutil.rmtree(tmp_dir)
     except OSError as e:
         print('Directory not copied. Error: %s' % e)
 
-    shutil.rmtree(tmp_dir)
     for j in VCFs:
         genesymbol=os.path.splitext(os.path.basename(j))[0]
         paverfile= "%s/%s.pathogenic.intervar.txt" % (out_dir,genesymbol)
