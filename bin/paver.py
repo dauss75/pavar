@@ -126,7 +126,7 @@ def __main__():
     hwe_bin="/Users/sjung/Documents/GitHub/pavar/bin/hwe.R"
     intervar_path="/Users/sjung/Documents/GitHub/pavar/InterVar/"
     tmp_dir = tempfile.mkdtemp(prefix="intervar-")
-    #print(tmp_dir)
+    print(tmp_dir)
     if not os.path.exists(options.inputF):
         print("input file does not exist!")
         exit()
@@ -139,7 +139,7 @@ def __main__():
         input_bed = "%s/input_bed" % tmp_dir
         os.mkdir(input_bed)
 
-    out_dir=options.out_dir
+    out_dir=os.getcwd()+"/"+options.out_dir
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
 
@@ -164,16 +164,17 @@ def __main__():
     except OSError as e:
         print('Directory not copied. Error: %s' % e)
 
+    shutil.rmtree(tmp_dir)
     for j in VCFs:
         genesymbol=os.path.splitext(os.path.basename(j))[0]
         paverfile= "%s/%s.pathogenic.intervar.txt" % (out_dir,genesymbol)
         vcffile= "%s/input_vcf/%s.vcf" % (out_dir,genesymbol)
         hwe= "%s/%s_hwe.txt" % (out_dir,genesymbol)
         cmd = "Rscript %s -v %s -i %s -o %s" % (hwe_bin, vcffile, paverfile, hwe)
-        #print(cmd); print(out_dir)
+        print(cmd); print(out_dir)
         hwe_proc(cmd, out_dir)
 
-    shutil.rmtree(tmp_dir)
+
 
 
 

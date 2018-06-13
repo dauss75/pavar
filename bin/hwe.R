@@ -1,7 +1,7 @@
- packages <- c("data.table", "HardyWeinberg", "optparse")
- if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+packages <- c("data.table", "HardyWeinberg", "optparse")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
    install.packages(setdiff(packages, rownames(installed.packages())),repos = "http://cran.us.r-project.org")
- }
+}
 suppressPackageStartupMessages(library(HardyWeinberg))
 suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(data.table))
