@@ -25,8 +25,8 @@ if ( is.null(opt$v) & is.null(opt$i)) {
 }
 
 ## temporary variables
-gnomad<-fread("/Users/sjung/Documents/GitHub/pavar/output/gnomad/wes/chr3/input_vcf/IQCB1.vcf");
-paver<-fread("/Users/sjung/Documents/GitHub/pavar/output/gnomad/wes/chr3/IQCB1.pathogenic.intervar.txt")
+# gnomad<-fread("/Users/sjung/Documents/GitHub/pavar/output/gnomad/wgs/chr1/input_vcf/CRB1.vcf");
+# paver<-fread("/Users/sjung/Documents/GitHub/pavar/output/gnomad/wgs/chr1/CRB1.pathogenic.intervar.txt")
 
 ##
 
@@ -34,9 +34,11 @@ colnames(gnomad)[1:5]<-c("Chr","Start","dbsnp","Ref","Alt")
 combo<-merge(gnomad,paver,by="Start")
 
 # HWE.test<-as.data.frame(matrix(, , ncol = 15))
-HWE.test<-as.data.frame(matrix(, , ncol = 16))
+HWE.test<-as.data.frame(matrix(, , ncol = 22))
 us.pop=326766748
-colnames(HWE.test)<-c("Chr","Pos","GC_MM","GC_MN","GC_NN","p-val","HWE","AF","AF_male","AF_female","LCA_AF","LCA_AF_male","LCA_AF_female","GC_population", "q=Sum(AF)","Estimated LCA")
+colnames(HWE.test)<-c("Chr","Pos","GC_MM","GC_MN","GC_NN","p-val","HWE","AF","AF_male","AF_female","LCA_AF",
+                      "LCA_AF_male","LCA_AF_female","GC_AFR", "GC_AMR","GC_ASJ","GC_EAS","GC_FIN","GC_NFE","GC_OTH",
+                      "q=Sum(AF)","Estimated LCA")
 alpha=0.05
 for (i in 1:nrow(combo)){
   if (length(unlist(strsplit(combo$Alt.x[i],","))) > 1){
@@ -68,7 +70,14 @@ for (i in 1:nrow(combo)){
       }
       HWE.test[i,8:10]<-c(AF[1],AF_male[1],AF_female[1])
       HWE.test[i,11:13]<-c(lca.AF,lca.AF_male,lca.AF_female)
-      HWE.test[i,14]<-GC_population<-gsub('.*;(GC_AFR=.*);GC_Male=.*','\\1',string)
+      HWE.test[i,14]<-unlist(strsplit(gsub('.*;GC_AFR=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,15]<-unlist(strsplit(gsub('.*;GC_AMR=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,16]<-unlist(strsplit(gsub('.*;GC_ASJ=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,17]<-unlist(strsplit(gsub('.*;GC_EAS=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,18]<-unlist(strsplit(gsub('.*;GC_FIN=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,19]<-unlist(strsplit(gsub('.*;GC_NFE=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,20]<-unlist(strsplit(gsub('.*;GC_OTH=(.*);.*','\\1',string),";"))[1];
+
     } else {
       HWE.test<-HWE.test[-i,]
       next
@@ -101,7 +110,13 @@ for (i in 1:nrow(combo)){
       }
       HWE.test[i,8:10]<-c(AF[1],AF_male[1],AF_female[1])
       HWE.test[i,11:13]<-c(lca.AF,lca.AF_male,lca.AF_female)
-      HWE.test[i,14]<-GC_population<-gsub('.*;(GC_AFR=.*);GC_Male=.*','\\1',string)
+      HWE.test[i,14]<-unlist(strsplit(gsub('.*;GC_AFR=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,15]<-unlist(strsplit(gsub('.*;GC_AMR=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,16]<-unlist(strsplit(gsub('.*;GC_ASJ=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,17]<-unlist(strsplit(gsub('.*;GC_EAS=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,18]<-unlist(strsplit(gsub('.*;GC_FIN=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,19]<-unlist(strsplit(gsub('.*;GC_NFE=(.*);.*','\\1',string),";"))[1];
+      HWE.test[i,20]<-unlist(strsplit(gsub('.*;GC_OTH=(.*);.*','\\1',string),";"))[1];
     } else {
       HWE.test<-HWE.test[-i,]
       next
@@ -114,5 +129,5 @@ sig_q <- sum(na.omit(HWE.test[,8]))
 # print(sig_q)
 LCA <- floor(sig_q*sig_q*us.pop)
 # print(carrier)
-HWE.test[1,15:16]<-c(sig_q,LCA)
+HWE.test[1,21:22]<-c(sig_q,LCA)
 fwrite(HWE.test, opt$o, sep="\t")

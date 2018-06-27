@@ -11,24 +11,34 @@ command: ./bin/paver.py --inputF input/genelist.txt --ref gnomad/gnomad.genomes.
          --out_dir: this folder will be created and the output files will be generated.
 """
 
-import optparse, os, sys, vcf, tempfile, subprocess, shutil, glob, gzip
+import optparse, os, sys, vcf, tempfile, subprocess, shutil, glob, gzip, re
 from subprocess import *
 
 CHUNK_SIZE = 2**20 #1mb
 
 #def gnomad2vcf(gene):
 #    return gene
+def gene2ensembl(gene, f1):
+    with open(f1,'r') as gtf:
+        for line in gtf:
+            gene_id = re.search('gene_id(.+?);', line)
+            gene_name = re.search('gene_name(.+?);', line)
+            if gene_name:
+                if (gene.strip() == gene_name.group(1).replace('"', '').strip()):
+                    ensel=gene_id.group(1).replace('"', '').strip()
+                    return ensel
 
 
-def extract_gene(inputF, input_vcf, ref_file):
+
+def extract_gene(inputF, input_vcf, ref_file, gtf):
     try:
         with open(inputF, 'r') as geneList:
             for g in geneList:
                 gene =g.rstrip("\n").upper()
-                #print(gene)
-                with open("%s/%s.vcf" % (input_vcf, gene), 'w') as gout, gzip.open(ref_file, 'rt') as ref:
-                    gout.writelines(["%s" % line for line in ref if gene in line])
-        ref.close()
+                ensl_gene=gene2ensembl(gene,gtf)
+                if ensl_gene is not None:
+                    with open("%s/%s.vcf" % (input_vcf, gene), 'w') as gout, gzip.open(ref_file, 'rt') as ref:
+                        gout.writelines(["%s" % line for line in ref if ensl_gene in line])
     except:
         print("vcf generation is failed")
         raise
@@ -125,6 +135,7 @@ def __main__():
     intervar_bin="/Users/sjung/Documents/GitHub/pavar/InterVar/Intervar.py"
     hwe_bin="/Users/sjung/Documents/GitHub/pavar/bin/hwe.R"
     intervar_path="/Users/sjung/Documents/GitHub/pavar/InterVar/"
+    gtf = "/Users/sjung/Documents/GitHub/pavar/gtf/Homo_sapiens.GRCh38.92.gtf"
     tmp_dir = tempfile.mkdtemp(prefix="intervar-")
     print(tmp_dir)
     if not os.path.exists(options.inputF):
@@ -143,12 +154,14 @@ def __main__():
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
 
-    extract_gene(inputF, input_vcf, options.ref)
+    extract_gene(inputF, input_vcf, options.ref, gtf)
+    print("VCF generation completed")
     VCFs = sorted(glob.glob("%s/*.vcf" % input_vcf))
     vcf2bed(VCFs, input_bed)
 
     #bedOutput = "%s/%s" % (tmp_dir, options.bedF); print(bedOutput)
     BEDs = sorted(glob.glob("%s/*.bed" % input_bed))
+    print("BED generation completed")
 
     for i in BEDs:
         intervarOutput = "%s.tmp" % (i); #print(intervarOutput)
@@ -164,6 +177,8 @@ def __main__():
         shutil.rmtree(tmp_dir)
     except OSError as e:
         print('Directory not copied. Error: %s' % e)
+
+    print("Intervar output completed")
 
     for j in VCFs:
         genesymbol=os.path.splitext(os.path.basename(j))[0]
