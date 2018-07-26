@@ -1,13 +1,16 @@
 # Pathogenic Variant Reporter (PAVAR)
 
-PAVAR classifies pathogenic rare variants based on the guideline of ACMG/AMP and estimate the affected number of persons  in the U.S. population, based on Hardy-Weinberg equilibrium (HWE).
+PAVAR classifies rare pathogenic variants based on the guideline of ACMG/AMP 2015 and estimate the affected number of individuals in the U.S. population (326,766,748 as of June 2018), based on the Hardy-Weinberg equilibrium (HWE).
+
+## Screenshot of Workflow
 
 ![Screenshot](paver.jpg)
 
-The program is written by python and R.
+The workflow takes in two input files, a text file containing a gene list and a vcf file from gnomad (i.e., wgs, wes). Then, for each gene the program extracts data from the gnomad vcf file followed by converting it to a bed file format.
+The bed file is fed into intervar and the output is parsed to generate three files. The pathogenic variants classified by intervar are used to estimate further the affected individuals using HWE.
 
-- Prerequisite:
-  - [InterVar](https://github.com/WGLab/InterVar)
+- Install the prerequisite:
+  - [InterVar](https://github.com/WGLab/InterVar) - install under the paver directory
   - R library dependencies: the hwe.R script automatically installs the packages if not found.
     - [HardyWeinberg](https://cran.r-project.org/web/packages/HardyWeinberg/index.html)
     - [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
