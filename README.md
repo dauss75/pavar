@@ -15,4 +15,7 @@ The program is written by python and R.
 
 - Now you are ready to run the [paver.py](https://github.com/dauss75/pavar/blob/master/bin/paver.py) script.
 
-./bin/paver.py --inputF input/chr3genes.txt --ref gnomad/gnomad.exomes.r2.0.2.sites.vcf.bgz --out_dir output/gnomad/wes/chr3
+Example
+```
+./bin/paver.py --inputF input/chr1genes.txt --ref gnomad/gnomad.genomes.r2.0.2.sites.chr1.vcf.bgz --out_dir output/gnomad/wgs/chr1
+```
