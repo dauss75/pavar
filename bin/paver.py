@@ -14,10 +14,6 @@ command: ./bin/paver.py --inputF input/genelist.txt --ref gnomad/gnomad.genomes.
 import optparse, os, sys, vcf, tempfile, subprocess, shutil, glob, gzip, re
 from subprocess import *
 
-CHUNK_SIZE = 2**20 #1mb
-
-#def gnomad2vcf(gene):
-#    return gene
 def gene2ensembl(gene, f1):
     with open(f1,'r') as gtf:
         for line in gtf:
@@ -95,7 +91,6 @@ def hwe_proc(cmd, tmp_dir):
     stdout.close()
 
 def post_proc(intervarF, outname, out_dir):
-    #intervarF="/var/folders/gq/y3z1z7dd6vjdf2kpryyp6h_h0000gn/T/intervar-jg4_f9n7/cep290.hg19_multianno.txt.intervar"
     intervar_reader = open(intervarF, 'r')
     header = intervar_reader.readline()
     intervar_only=[]
@@ -160,7 +155,6 @@ def __main__():
     VCFs = sorted(glob.glob("%s/*.vcf" % input_vcf))
     vcf2bed(VCFs, input_bed)
 
-    #bedOutput = "%s/%s" % (tmp_dir, options.bedF); print(bedOutput)
     BEDs = sorted(glob.glob("%s/*.bed" % input_bed))
     print("BED generation completed")
 
@@ -189,12 +183,5 @@ def __main__():
         cmd = "Rscript %s -v %s -i %s -o %s" % (hwe_bin, vcffile, paverfile, hwe)
         print(cmd); print(out_dir)
         hwe_proc(cmd, out_dir)
-
-
-
-
-
-
-
 
 if __name__=="__main__": __main__()

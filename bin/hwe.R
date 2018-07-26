@@ -24,12 +24,6 @@ if ( is.null(opt$v) & is.null(opt$i)) {
   }
 }
 
-## temporary variables
-# gnomad<-fread("/Users/sjung/Documents/GitHub/pavar/output/gnomad/wgs/chr1/input_vcf/CRB1.vcf");
-# paver<-fread("/Users/sjung/Documents/GitHub/pavar/output/gnomad/wgs/chr1/CRB1.pathogenic.intervar.txt")
-
-##
-
 colnames(gnomad)[1:5]<-c("Chr","Start","dbsnp","Ref","Alt")
 combo<-merge(gnomad,paver,by="Start")
 
@@ -45,7 +39,7 @@ for (i in 1:nrow(combo)){
     # find position of the allele
     string=combo$V8[i]
     index=which(unlist(strsplit(combo$Alt.x[i],",")) == combo$Alt.y[i])
-    
+
     GC<-unlist(strsplit(gsub('.*;GC=(.*);.*','\\1',string),";"))[1];
     GC_content=as.numeric(unlist(strsplit(GC,","))[(3*(index-1)+1):(3*(index-1)+3)])
     AF<-as.numeric(unlist(strsplit(gsub('.*;AF=(.*);AN=.*','\\1',string),",")))[index]
@@ -55,11 +49,11 @@ for (i in 1:nrow(combo)){
     lca.AF_male<-floor(AF_male[1]*(us.pop/2))
     AF_female<-as.numeric(unlist(strsplit(gsub('.*;AF_Female=(.*);GC_Male=.*','\\1',string),",")))[index]
     lca.AF_female<-floor(AF_female[1]*(us.pop/2))
-    
+
     HWE.test[i,1:2]<-c(combo$Chr[i],combo$Start[i])
     HWE.test[i,3:5]<-c(MM=GC_content[1],MN=GC_content[2],NN=GC_content[3]); x<-c(MM=GC_content[1],MN=GC_content[2],NN=GC_content[3])
     # print(x)
-    
+
     # chi-square test without Yates’ continuity correction, which is not recommended for low minor allele frequencies
     if (sum(x) > 0 & x[1]>100){  # temporary value
       HWE.test[i,6] <- HWChisq(x, cc = 0, verbose = FALSE)$pval
@@ -82,7 +76,7 @@ for (i in 1:nrow(combo)){
       HWE.test<-HWE.test[-i,]
       next
     }
-    
+
   } else {
     # find position of the allele
     string=combo$V8[i]
@@ -96,10 +90,10 @@ for (i in 1:nrow(combo)){
     AF_female<-as.numeric(unlist(strsplit(gsub('.*;AF_Female=(.*);GC_Male=.*','\\1',string),";"))[1])
     GC_population<-gsub('.*;(GC_AFR=.*);GC_Male=.*','\\1',string)
     lca.AF_female<-floor(AF_female[1]*(us.pop/2))
-    
+
     HWE.test[i,1:2]<-c(combo$Chr[i],combo$Start[i])
     HWE.test[i,3:5]<-c(MM=GC_content[1],MN=GC_content[2],NN=GC_content[3]); x<-c(MM=GC_content[1],MN=GC_content[2],NN=GC_content[3])
-    
+
     # chi-square test without Yates’ continuity correction, which is not recommended for low minor allele frequencies
     if (sum(x) > 0 & x[1]>1000){
       HWE.test[i,6] <- HWChisq(x, cc = 0, verbose = FALSE)$pval
@@ -121,7 +115,7 @@ for (i in 1:nrow(combo)){
       HWE.test<-HWE.test[-i,]
       next
     }
-    
+
   }
 }
 #print(na.omit(HWE.test[,8]))
