@@ -19,6 +19,7 @@ The bed file is fed into intervar and the output is parsed to generate three fil
 - Now you are ready to run the [paver.py](https://github.com/dauss75/pavar/blob/master/bin/paver.py) script.
 
 Example
+
 ```
 ./bin/paver.py --inputF input/chr1genes.txt --ref gnomad/gnomad.genomes.r2.0.2.sites.chr1.vcf.bgz --out_dir output/gnomad/wgs/chr1
 ```
