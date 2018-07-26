@@ -135,7 +135,8 @@ def __main__():
     intervar_bin="/Users/sjung/Documents/GitHub/pavar/InterVar/Intervar.py"
     hwe_bin="/Users/sjung/Documents/GitHub/pavar/bin/hwe.R"
     intervar_path="/Users/sjung/Documents/GitHub/pavar/InterVar/"
-    gtf = "/Users/sjung/Documents/GitHub/pavar/gtf/Homo_sapiens.GRCh38.92.gtf"
+    #gtf = "/Users/sjung/Documents/GitHub/pavar/gtf/Homo_sapiens.GRCh38.92.gtf"
+    gtf = "/Users/sjung/Documents/GitHub/pavar/gtf/Homo_sapiens.GRCh37.75.gtf"
     tmp_dir = tempfile.mkdtemp(prefix="intervar-")
     print(tmp_dir)
     if not os.path.exists(options.inputF):

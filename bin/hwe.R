@@ -34,11 +34,11 @@ colnames(gnomad)[1:5]<-c("Chr","Start","dbsnp","Ref","Alt")
 combo<-merge(gnomad,paver,by="Start")
 
 # HWE.test<-as.data.frame(matrix(, , ncol = 15))
-HWE.test<-as.data.frame(matrix(, , ncol = 22))
+HWE.test<-as.data.frame(matrix(, , ncol = 21))
 us.pop=326766748
 colnames(HWE.test)<-c("Chr","Pos","GC_MM","GC_MN","GC_NN","p-val","HWE","AF","AF_male","AF_female","LCA_AF",
                       "LCA_AF_male","LCA_AF_female","GC_AFR", "GC_AMR","GC_ASJ","GC_EAS","GC_FIN","GC_NFE","GC_OTH",
-                      "q=Sum(AF)","Estimated LCA")
+                      "Estimated LCA")
 alpha=0.05
 for (i in 1:nrow(combo)){
   if (length(unlist(strsplit(combo$Alt.x[i],","))) > 1){
@@ -61,7 +61,7 @@ for (i in 1:nrow(combo)){
     # print(x)
     
     # chi-square test without Yates’ continuity correction, which is not recommended for low minor allele frequencies
-    if (sum(x) > 0 & x[1]>5000){  # temporary value
+    if (sum(x) > 0 & x[1]>100){  # temporary value
       HWE.test[i,6] <- HWChisq(x, cc = 0, verbose = FALSE)$pval
       if (HWE.test[i,6] < alpha){
         HWE.test[i,7]<-"FALSE"
@@ -125,9 +125,12 @@ for (i in 1:nrow(combo)){
   }
 }
 #print(na.omit(HWE.test[,8]))
+HWE.test<-HWE.test[!is.na(HWE.test$Chr),]
 sig_q <- sum(na.omit(HWE.test[,8]))
 # print(sig_q)
+# HWE.test[,21]<-floor(HWE.test$AF*HWE.test$AF*us.pop)
+# LCA<-sum(HWE.test[,21])
 LCA <- floor(sig_q*sig_q*us.pop)
 # print(carrier)
-HWE.test[1,21:22]<-c(sig_q,LCA)
+HWE.test[1,21]<-LCA
 fwrite(HWE.test, opt$o, sep="\t")
