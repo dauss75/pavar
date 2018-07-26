@@ -2,7 +2,7 @@
 
 PAVAR classifies pathogenic rare variants based on the guideline of ACMG/AMP and estimate the affected number of persons  in the U.S. population, based on Hardy-Weinberg equilibrium (HWE).
 
-![Screenshot](paver.png)
+![Screenshot](paver.jpg)
 
 The program is written by python and R.
 
